@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>图书管理系统</title>
+    <link rel="icon" href="/static/shubiao.png">
+    <link rel="stylesheet" href="../static/css/sweetalert.css">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+    <script src="../static/js/sweetalert-dev.js"></script>
+    <script src="../static/js/time.js"></script>
+    <style>
+        #aa {
+            line-height: 38px;
+        }
+        nav{
+            position:relative;
+        }
+        #zhuxiao{
+        font-size: 25px;
+        text-decoration:none;
+        position:absolute;
+        color:#dca7a7;
+        margin-left: 950px;
+    }
+    #timeold{
+        font-size: 25px;
+        text-decoration:none;
+        position:absolute;
+        margin-left: 20px;
+    }
+    #timeShow{
+    font-size: 25px;
+    text-decoration:none;
+    position:absolute;
+    margin-left: 450px;
+    }
+
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">图书管理系统</a>
+            <a class="time navbar-brand" id="timeold" href="#">上次登录时间：{{ login_time}}</a>
+            <a class="time navbar-brand" id="timeShow" href="#"></a>
+            <a href="/logout/" class="time1 navbar-brand" id="zhuxiao">注销</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="panel panel-default">
+                <div class="panel panel-heading">书籍信息
+                    <a href="/add/" id="aa">
+                        <button type="button" class="btn btn-default pull-right">添加书籍</button>
+                    </a>
+                </div>
+                <table class="table table-hover" id="book_id">
+                    <thead>
+                    <tr>
+                        <th>编号</th>
+                        <th>书名</th>
+                        <th>价格</th>
+                        <th>出版社</th>
+                        <th>出版时间</th>
+                        <th>作者</th>
+                        <th>编辑</th>
+                        <th>删除</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for foo in book_list %}
+                        <tr id="p{{ foo.id }}">
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ foo.title }}</td>
+                            <td>{{ foo.price }}</td>
+                            <td>{{ foo.publish.name }}</td>
+                            <td>{{ foo.pub_date|date:"Y-m-d" }}</td>
+                            <td>
+                                {% for i in foo.authors.all %}
+                                    {% if not forloop.last %}
+                                        {{ i.name }},&nbsp
+                                    {% else %}
+                                        {{ i.name }}
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {#当点击编辑页面的时候，将书的id发送过去操作#}
+                                <a href="edit/{{ foo.id }}">
+                                    <button type="button" class="btn btn_success">编辑</button>
+                                </a>
+                            </td>
+                            <td>
+                                    <button  class="del btn btn_warning" value="{{ foo.id }}">删除</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(".del").click(function () {
+        var book_id = $(this).val();
+        console.log(book_id);
+        var url = "/delbook/"+book_id;
+        swal({
+          title: "确定删除吗？",
+          text: "你将无法恢复该虚拟文件！",
+          type: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#DD6B55",
+          cancelButtonColor: "#005AB5",
+          confirmButtonText: "确定删除！",
+          cancelButtonText: "取消删除！",
+          closeOnConfirm: false,
+          closeOnCancel: false
+        },
+        function(isConfirm){
+          if (isConfirm) {
+            swal("删除！", "你的虚拟文件已经被删除。",
+        "success");
+              $.ajax({
+                url:url,
+                type:"get",
+               success:function (data) {
+                    console.log(data);
+                   $("#p"+data).hide()
+               }
+            })
+          } else {
+            swal("取消！", "你的虚拟文件是安全的:)",
+        "error");
+          }
+        });
+    });
+
+</script>
+</body>
+</html>
